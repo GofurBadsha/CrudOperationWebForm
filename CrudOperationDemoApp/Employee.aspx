@@ -45,6 +45,17 @@
                 </div>
             </div>
             <div class="col-md-4"></div>
+           
+        </div>
+        <div class="row">
+             <div class="row">
+                <div class="col-8">
+                    <asp:TextBox ID="txtSearch" runat="server" Height="33px" Width="298px"></asp:TextBox>
+                </div>
+                <div class="col-4">
+                    <asp:Button ID="btnSearch" class="btn btn-success" style="margin-top:5px" runat="server" Text="Search" OnClick="btnSearch_Click" Width="119px" />
+                </div>
+            </div>
             <div class="table table-striped table-hover table-responsive" runat="server">
                 <asp:GridView ID="gvEployee" OnRowCancelingEdit="gvEployee_RowCancelingEdit" OnRowEditing="gridviewRowEditing" OnRowUpdating="GridView_RowUpdating" class="table table-striped" runat="server" Style="margin-top: 20px !important" Height="94px" Width="100%" HeaderStyle-BackColor="#3AC0F2" AutoGenerateColumns="false" HeaderStyle-ForeColor="White">
 

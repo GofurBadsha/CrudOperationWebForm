@@ -40,7 +40,8 @@ namespace CrudOperationDemoApp
                 int t = sqlcmd.ExecuteNonQuery();
                 if (t == 1)
                 {
-                    lblSeuccessMessage.Text = "Save successful.";
+                    Session["userName"] = txtName.Text;
+                    lblSeuccessMessage.Text = "Save successful  " + Session["userName"];
                     lblSeuccessMessage.Visible = true;
                     clear();
                 }
@@ -51,7 +52,6 @@ namespace CrudOperationDemoApp
             }
             catch (Exception ex)
             {
-
                 lblEroreMessage.Text = "Not save data" + ex.Message;
             }
         }
@@ -72,15 +72,21 @@ namespace CrudOperationDemoApp
             DataSet dtbl = new DataSet();
             sqlDA.Fill(dtbl);
             myCon.Close();
-            DataTable dt= dtbl.Tables[0];
-            gvEployee.DataSource = dt;
-            gvEployee.DataBind();
+            DataTable dt= dtbl.Tables[0];           
+            Session["employeeTable"] = dt;
+            this.Data_Bind();
         }
 
         protected void gridviewRowEditing(object sender, GridViewEditEventArgs e)
         {
             gvEployee.EditIndex = e.NewEditIndex;
-            EmployeeTableGridView();
+            //EmployeeTableGridView();
+            string searchname = "%" + this.txtSearch.Text.Trim() + "%";
+            DataTable dt = ((DataTable)Session["employeeTable"]).Copy();
+            DataView dv = dt.DefaultView;
+            dv.RowFilter = ("EmployeeName like '" + searchname + "'");
+            gvEployee.DataSource = dv.ToTable();
+            gvEployee.DataBind();
         }
         protected void GridView_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
@@ -115,13 +121,6 @@ namespace CrudOperationDemoApp
 
             gvEployee.EditIndex = -1;
             EmployeeTableGridView();
-
-            //int index = gvEployee.EditIndex;
-            //GridViewRow row = gvEployee.Rows[index];
-            //lblSeuccessMessage.Text = "Updated record " + row.Cells[1].Text + ".";
-
-            //EmployeeTableGridView();
-
         }
         protected void gvCompanies_RowCommand(object sender, GridViewUpdateEventArgs e)
         {
@@ -188,5 +187,69 @@ namespace CrudOperationDemoApp
             ReportViewer1.LocalReport.DataSources.Add(source);
             ReportViewer1.LocalReport.Refresh();
         }
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            //myCon.Open();
+            //SqlDataAdapter sda = new SqlDataAdapter("GetEmployeeByName", myCon);
+            //sda.SelectCommand.CommandType = CommandType.StoredProcedure;
+            //sda.SelectCommand.Parameters.AddWithValue("@EmployeeName", txtSearch.Text);
+            //DataSet ds = new DataSet();
+            //sda.Fill(ds);
+            //myCon.Close();
+            //DataTable dt = ds.Tables[0];
+
+            string searchname = "%"+this.txtSearch.Text.Trim()+"%";
+            DataTable dt = ((DataTable)Session["employeeTable"]).Copy();
+            DataView dv = dt.DefaultView;
+            dv.RowFilter = ("EmployeeName like '" + searchname + "'");
+            gvEployee.DataSource = dv.ToTable();
+            gvEployee.DataBind();
+
+        }
+        private void Data_Bind()
+        {
+            //DataTable dt = ((DataTable)Session["employeeTable"]);
+            //gvEployee.DataSource = dt;
+            //gvEployee.DataBind();
+
+            DataTable dt = ((DataTable)Session["employeeTable"]);
+
+            List<Employee_property> employeeList = new List<Employee_property>();
+            
+            foreach(DataRow item in dt.Rows)
+            {
+                Employee_property ep = new Employee_property {
+                    EmployeeId = Convert.ToInt32(item[0]),
+                    EmployeeName = item[1].ToString(),
+                    EmployeeDepartment = item[2].ToString(),
+                    EmployeeAdress = item[3].ToString(),
+                    EmployeeContactNo = item[4].ToString(),
+                    EmployeeSalary = Convert.ToDouble(item[5]),
+                    SchooleId = Convert.ToInt32(item[6])
+                };
+
+                employeeList.Add(ep);
+            }
+
+            //List<Employee_property> list = new List<Employee_property>();
+            //list = employeeList.OrderByDescending(a => a.EmployeeId).Skip(5).Take(5).ToList();
+
+            gvEployee.DataSource = employeeList;
+            gvEployee.DataBind();
+        }
+    }
+
+
+
+    public class Employee_property
+    {
+        public int EmployeeId { get; set; }
+        public string EmployeeName { get; set; }
+        public string EmployeeDepartment { get; set; }
+        public string EmployeeAdress { get; set; }
+        public string EmployeeContactNo { get; set; }
+        public double EmployeeSalary { get; set; }
+        public int SchooleId { get; set; }
     }
 }
